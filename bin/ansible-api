@@ -14,6 +14,9 @@ import sys
 import os
 import getopt
 
+# Run straight from Git clone:
+sys.path.insert(0, os.path.abspath('src'))
+
 from ansible_api.tool import Tool
 from ansible_api.config import Config
 from ansible_api.server import Server

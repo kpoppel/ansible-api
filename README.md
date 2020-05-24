@@ -9,7 +9,8 @@ python version >= 3.7
 If you are trying to use it and not like CLI, you can try me now. I can provide you use ansible by A RESTful HTTP Api and a realtime processing message (websocket api), you can see all details.
 
 ## Changelog
-
+  + added shell script demonstrating the tool
+  + Fix bug in tool.py, which did not respect log_file placement setting in api.cfg
 - 0.5.1 
   + add sha256 encryption support for signature (thx: jbackman)
   + fit for latest ansible(v2.8.6) and ansible-runner(v1.4.2)
@@ -29,6 +30,9 @@ If you are trying to use it and not like CLI, you can try me now. I can provide 
 
 - [preparatory work] python version >= 3.7 (use asyncio featrue)
 - ```pip3 install ansible-api```
+- Not this will not necessarily install the GitHub latest version.
+- Better to install `ansible_runner`, then clone the git repo:
+-  ```pip3 install ansible-runner```
 
 ## How to start it
 
@@ -42,3 +46,6 @@ eg: ansible-api -c /etc/ansible/api.cfg -d > /dev/null &
 ## How to prepare your data
 
 [HTTP API Usage](https://github.com/lfbear/ansible-api/wiki/http-api-usage)
+
+## Demonstration:
+Look into `api_demo.sh` to see an example.

@@ -22,7 +22,7 @@ class Tool(object):
         log_format = "%(asctime)s | %(levelname)s - %(message)s"
         date_format = "%Y-%m-%d %H:%M:%S"
         log_formatter = logging.Formatter(fmt=log_format, datefmt=date_format)
-        err_handler = logging.handlers.TimedRotatingFileHandler('/var/log/ansible-api.err', when='midnight')
+        err_handler = logging.handlers.TimedRotatingFileHandler( Config.get('log_path'), when='midnight')
         err_handler.setFormatter(log_formatter)
         err_handler.setLevel(logging.WARNING)
         if isinstance(path, str) and os.path.exists(os.path.dirname(path)):
