@@ -161,7 +161,7 @@ class Playbook(MyHttpView):
                     Tool.LOGGER.exception(e)
                     return json({'error': str(e), 'rc': ErrorCode.ERRCODE_BIZ})
             else:
-                return json({'error': "yml file(" + yml_file + ") is not existed",
+                return json({'error': "yml file(" + yml_file + ") does not exist",
                              'rc': ErrorCode.ERRCODE_SYS})
 
     def run(self, hosts, name, yml_file, my_vars, cb):
@@ -190,7 +190,7 @@ class FileList(MyHttpView):
                     dirs = os.listdir(path_var)  # cache it if called frequently
                     return json({'list': dirs})
                 else:
-                    return json({'error': "Path is not existed", 'rc': ErrorCode.ERRCODE_SYS})
+                    return json({'error': "Path does not exist", 'rc': ErrorCode.ERRCODE_SYS})
         else:
             return json({'error': "Wrong type in argument", 'rc': ErrorCode.ERRCODE_SYS})
 
