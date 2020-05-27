@@ -108,6 +108,7 @@ class Command(MyHttpView):
                     Tool.LOGGER.exception(e)
                     return json({'error': str(e), 'rc': ErrorCode.ERRCODE_BIZ})
 
+    # Worker function called from the threadpool above.
     def run(self, target, name, module, arg, cb):
         return ansible_runner.interface.run(
             host_pattern=target, inventory='/etc/ansible/hosts',
@@ -129,19 +130,38 @@ class Playbook(MyHttpView):
         hosts = data['h']
         sign = data['s']
         yml_file = data['f'].encode('utf-8').decode()
+
         # forks = data.get('c', 50)
         check_str = Tool.encrypt_sign(name, hosts, yml_file, Config.get('sign_key'))
         if sign != check_str:
             return json({'error': "Sign is error", 'rc': ErrorCode.ERRCODE_BIZ})
         else:
-            my_vars = {'hosts': hosts}
-            # injection vars in playbook (rule: vars start with "v_" in
-            # post data)
+            extravars = {'hosts': hosts}
+            # injection vars in playbook.  Post data starting with v_ or e_ are handled
+            #  v_: individual ars added to extravars parameter in ansible_runner
             for (k, v) in data.items():
                 if k[0:2] == "v_":
-                    my_vars[k[2:]] = v
-            yml_file = Config.get('dir_playbook') + yml_file
+                    extravars[k[2:]] = v
 
+            extravarsfiles = ""
+            if 'e' in data:
+                #  Build commandline if a list of files was provided
+                if isinstance(data['e'], list):
+                    for var in data['e']:
+                        extravarsfiles += "-e \"@"+var+"\" "
+                else:
+                    extravarsfiles = "-e \"@"+data['e']+"\""
+
+            Tool.LOGGER.info("extravars {0}, extravarsfiles: {1}".format(extravars, extravarsfiles))
+
+            # Commandline switches.  These are concatenated as-is and passed on to ansible
+            # Add the extravars file arguments here first.
+            cmdline = extravarsfiles+" "
+            for (k, v) in data.items():
+                if k[0:2] == "c_":
+                    cmdline += v+" "
+
+            yml_file = Config.get('dir_playbook') + yml_file
             if os.path.isfile(yml_file):
                 task_list = []
                 with open(yml_file, 'r') as contents:
@@ -154,8 +174,8 @@ class Playbook(MyHttpView):
                     cb.event_pepper('playbook_on_play_start', dict(task_list=task_list))
                     loop = asyncio.get_running_loop()
                     with concurrent.futures.ThreadPoolExecutor() as pool:
-                        response = await loop.run_in_executor(pool, self.run, hosts, name, yml_file, my_vars, cb)
-                        # response = yield self.run(hosts, name, yml_file, my_vars, cb)
+                        response = await loop.run_in_executor(pool, self.run, hosts, name, yml_file, extravars, cmdline, cb)
+                        # response = yield self.run(hosts, name, yml_file, extravars, cb)
                         return json(dict(rc=response.rc, detail=cb.get_summary()))
                 except BaseException as e:
                     Tool.LOGGER.exception(e)
@@ -164,11 +184,12 @@ class Playbook(MyHttpView):
                 return json({'error': "yml file(" + yml_file + ") does not exist",
                              'rc': ErrorCode.ERRCODE_SYS})
 
-    def run(self, hosts, name, yml_file, my_vars, cb):
+    # Worker function called from the threadpool above.
+    def run(self, hosts, name, yml_file, extravars, cmdline, cb):
         return ansible_runner.interface.run(
             host_pattern=hosts, inventory='/etc/ansible/hosts',
             envvars=dict(PATH=os.environ.get('PATH') + ':' + sys.path[0]),
-            playbook=yml_file, ident=name, extravars=my_vars,
+            playbook=yml_file, ident=name, extravars=extravars, cmdline=cmdline,
             event_handler=cb.event_handler, status_handler=cb.status_handler
         )
 

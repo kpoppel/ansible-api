@@ -130,6 +130,9 @@ class Reporter(object):
             elif event == 'warning':
                 Tool.LOGGER.info('[warning event] %s' % self._raw)
                 return False
+            elif event == 'verbose':
+                Tool.LOGGER.info('[verbose event] %s' % self._raw)
+                return False
             # elif event == 'MORE EVENT NAME'
             # pass # --- you can add more event filter here ---
             else:

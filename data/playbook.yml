@@ -1,7 +1,14 @@
 ---
 - hosts: 127.0.0.1
   tasks:
-  - name: Display variable
+  - name: Display variable from v_ argument
     debug:
       var: some_variable
 
+  - name: Display extra variable from file e parameter
+    debug:
+      var: myextravar
+
+  - name: Display extra variable from cmdline argument
+    debug:
+      var: myextravar1
