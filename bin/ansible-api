@@ -49,6 +49,7 @@ if __name__ == "__main__":
     else:
         log_path = None
         print('Debug Mode')
+        print('To turn off debug messages, specify -d on the command line')
     print('\033[0m')
 
     Tool.init_logger(log_path)
