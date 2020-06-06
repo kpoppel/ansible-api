@@ -10,6 +10,7 @@ import json
 
 from sanic import Sanic
 from sanic.response import text
+from sanic_cors import CORS, cross_origin
 
 from .tool import Tool
 from .config import Config
@@ -20,6 +21,8 @@ class Server(object):
 
     def __init__(self, daemon):
         app = Sanic('ansible-api')
+        # https://pypi.org/project/Sanic-Cors/
+        CORS(app)
 
         app.add_route(controller.Main.as_view(), '/')
         app.add_route(controller.NonBlockTest.as_view(), '/test')

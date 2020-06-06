@@ -37,22 +37,6 @@ __all__ = [
     'NonBlockTest',
 ]
 
-
-allowed_origins = ['http://www.uutisjuttu.fi']
-
-def cors():
-    def decorator(f):
-        @wraps(f)
-        async def decorated_function(request, *args, **kwargs):
-            response = await f(request, *args, **kwargs)
-            if 'ORIGIN' in request.headers:
-                origin = request.headers['ORIGIN']
-                if origin in allowed_origins:
-                    response.headers['Access-Control-Allow-Origin'] = origin
-            return response
-        return decorated_function
-    return decorator
-
 class ErrorCode(object):
     ERRCODE_NONE = 0
     ERRCODE_SYS = 1
@@ -65,7 +49,6 @@ class MyHttpView(HTTPMethodView):
 
 class Main(MyHttpView):
 
-    @cors()
     def get(self, request):
         return json({'message': "Hello, I am Ansible Api", 'rc': ErrorCode.ERRCODE_NONE})
 
@@ -77,7 +60,6 @@ class NonBlockTest(MyHttpView):
         end = time.time() - start
         return json({'message': msg + 'and total cost time: %s' % end,
                      'rc': ErrorCode.ERRCODE_NONE,
-                     'headers': { 'Access-Control-Allow-Origin' : '*'}
                     })
 
     async def run_block(self):
