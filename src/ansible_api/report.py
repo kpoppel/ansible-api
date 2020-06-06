@@ -85,11 +85,10 @@ class Reporter(object):
                 Tool.LOGGER.debug('[event: runner_item_on_skipped] %s on hosts %s' %
                                   (event_data.get('task'), event_data.get('host')))
                 return False
-            elif event == 'runner_item_on_ok':  # TODO (don't?) ignore this event
-#                Tool.LOGGER.debug('[event: runner_item_on_ok] %s on hosts %s' %
-#                                  (event_data.get('task'), event_data.get('host')))
-                Tool.LOGGER.info('[runner_item_on_ok] %s' % self._raw)
-#                return False
+            elif event == 'runner_item_on_ok':  # ignore this event
+                #Of type: {'event': 'runner_item_on_ok', 'runner_ident': '...#...@...', 'uuid': '...', 'pid': None}
+                Tool.LOGGER.debug('[event: runner_item_on_ok] %s' % self._raw)
+                return False
             elif event == 'playbook_on_play_start':
                 result['type'] = 'play_start'
                 result['name'] = event_data.get('name')
